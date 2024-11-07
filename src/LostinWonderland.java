@@ -44,6 +44,7 @@ public class LostinWonderland extends JPanel implements ActionListener {
     private final Image heartImage;
     private final Image keyImage;
     private final Image doorImage;
+    private Image openDoorImage;
     private final Image boxImage;
 
     private final ArrayList<Point> coins = new ArrayList<>();
@@ -110,6 +111,7 @@ public class LostinWonderland extends JPanel implements ActionListener {
         heartImage = new ImageIcon("D:\\game\\src\\heart.png").getImage();
         keyImage = new ImageIcon("D:\\game\\src\\key.png").getImage();
         doorImage = new ImageIcon("D:\\game\\src\\door.png").getImage();
+        openDoorImage = new ImageIcon("D:\\game\\src\\door2.png").getImage();
         lampImage = new ImageIcon("D:\\game\\src\\lamp.png").getImage();
         boxImage = new ImageIcon("D:\\game\\src\\box.png").getImage();
 
@@ -178,8 +180,12 @@ public class LostinWonderland extends JPanel implements ActionListener {
         if (currentLevel == 2) {
             if (!hasKey) {
                 g.drawImage(keyImage, keyPosition.x - cameraX, 250, 30, 19, this);
+            }else if (hasKey && playerX + PLAYER_WIDTH > doorPosition.x && playerX < doorPosition.x + 60
+                    && playerY + PLAYER_HEIGHT > doorPosition.y && playerY < doorPosition.y + 90) {
+                g.drawImage(openDoorImage, doorPosition.x - cameraX, 185, 60, 90, this);
+            } else {
+                g.drawImage(doorImage, doorPosition.x - cameraX, 185, 60, 90, this);
             }
-            g.drawImage(doorImage, doorPosition.x - cameraX, 185, 60, 90, this);
         }
 
         g.drawImage(heartImage,10,340,30,27,this );
@@ -406,12 +412,21 @@ public class LostinWonderland extends JPanel implements ActionListener {
         if (countdownThread != null && countdownThread.isAlive()) {
             countdownThread.interrupt();
         }
-        JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(this);
-        frame.getContentPane().removeAll();
-        Win winPanel = new Win(frame);
-        frame.add(winPanel);
-        frame.revalidate();
-        frame.repaint();
+        Timer delayTimer = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ((Timer)e.getSource()).stop();
+
+                JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(LostinWonderland.this);
+                frame.getContentPane().removeAll();
+                Win winPanel = new Win(frame);
+                frame.add(winPanel);
+                frame.revalidate();
+                frame.repaint();
+            }
+        });
+        delayTimer.setRepeats(false);
+        delayTimer.start();
     }
 
     private class TAdapter extends KeyAdapter {
